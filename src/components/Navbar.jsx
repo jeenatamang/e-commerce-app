@@ -3,9 +3,11 @@ import { openCart } from "../features/cart/cartSlice";
 import { Link } from "react-router-dom";
 import { IoIosSearch } from "react-icons/io";
 import { FaBagShopping } from "react-icons/fa6";
+import {setSearchQuery} from "../features/products/productSlice";
 
 const Navbar = () => {
   const dispatch = useDispatch();
+  const searchQuery = useSelector((state) => state.products.searchQuery);
   const totalItems = useSelector((state) =>
     state.cart.items.reduce((sum, item) => sum + item.quantity, 0)
   );
@@ -27,6 +29,8 @@ const Navbar = () => {
             <input
               type="text"
               placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => dispatch(setSearchQuery(e.target.value))}
               className="text-sm w-full pl-10 pr-3 py-2 bg-stone-100 border rounded-xl border-stone-300 focus:outline-none focus:ring-2 focus:ring-stone-400"
             />
           </div>

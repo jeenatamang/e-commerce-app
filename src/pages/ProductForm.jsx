@@ -17,7 +17,6 @@ const emptyForm = {
 const ProductForm = ({ editData = null, onDone }) => {
   const dispatch = useDispatch();
   const [form, setForm] = useState(emptyForm);
-  const [image, setImage] = useState("");
 
   useEffect(() => {
     if (editData) {
@@ -30,10 +29,8 @@ const ProductForm = ({ editData = null, onDone }) => {
         description: editData.description || "",
         image: editData.image || "",
       });
-      setImage(editData.image || "");
     } else {
       setForm(emptyForm);
-      setImage("");
     }
   }, [editData]);
 
@@ -48,9 +45,9 @@ const ProductForm = ({ editData = null, onDone }) => {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setImage(reader.result);
+      setForm((prev) => ({ ...prev, image: reader.result }));
     };
-    reader.readAsDataURL(file); 
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = (e) => {
@@ -59,9 +56,9 @@ const ProductForm = ({ editData = null, onDone }) => {
     const product = {
       ...form,
       price: parseFloat(form.price),
-      stockCount: parseInt(form.stockCount),
+      stockCount: parseInt(form.stockCount, 10),
       rating: parseFloat(form.rating),
-      inStock: parseInt(form.stockCount) > 0,
+      inStock: parseInt(form.stockCount, 10) > 0,
     };
 
     if (editData) {
@@ -69,8 +66,8 @@ const ProductForm = ({ editData = null, onDone }) => {
     } else {
       dispatch(addProduct({ ...product, id: Date.now() }));
     }
+
     setForm(emptyForm);
-    setImage("");
     if (onDone) onDone();
   };
 
@@ -80,10 +77,10 @@ const ProductForm = ({ editData = null, onDone }) => {
         <label className="text-xs font-semibold text-stone-500 mb-1 block">
           Product Image
         </label>
-        {image && (
+        {form.image && (
           <img
-            src={image}
-            alt="Image"
+            src={form.image}
+            alt="Preview"
             className="w-full h-40 object-cover rounded-xl mb-2 bg-stone-100"
           />
         )}
@@ -97,10 +94,7 @@ const ProductForm = ({ editData = null, onDone }) => {
         <input
           name="image"
           value={form.image.startsWith("data:") ? "" : form.image}
-          onChange={(e) => {
-            handleChange(e);
-            setPreview(e.target.value);
-          }}
+          onChange={handleChange}
           placeholder="Or paste an image URL (https://...)"
           className="mt-2 w-full border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-400"
         />
@@ -153,6 +147,7 @@ const ProductForm = ({ editData = null, onDone }) => {
           />
         </div>
       </div>
+
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="text-xs font-semibold text-stone-500 mb-1 block">
@@ -185,6 +180,7 @@ const ProductForm = ({ editData = null, onDone }) => {
           />
         </div>
       </div>
+
       <div>
         <label className="text-xs font-semibold text-stone-500 mb-1 block">
           Description

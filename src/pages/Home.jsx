@@ -6,11 +6,22 @@ const CATEGORIES = ["All", "Electronics", "Accessories", "Footwear", "Bags", "Li
 
 const Home = () => {
   const dispatch = useDispatch();
-  const { items, selectedCategory, sortBy } = useSelector((state) => state.products);
-
-  const filtered = items.filter(
-    (p) => selectedCategory === "All" || p.category === selectedCategory
+  const { items, selectedCategory, sortBy, searchQuery } = useSelector(
+    (state) => state.products
   );
+
+  const filtered = items.filter((p) => {
+    const matchesCategory =
+      selectedCategory === "All" || p.category === selectedCategory;
+
+    const term = (searchQuery || "").trim().toLowerCase();
+    const matchesSearch =
+      p.name.toLowerCase().includes(term) ||
+      p.description.toLowerCase().includes(term);
+
+    return matchesCategory && matchesSearch;
+  });
+
   const sorted = [...filtered].sort((a, b) => {
     if (sortBy === "price-asc") return a.price - b.price;
     if (sortBy === "price-desc") return b.price - a.price;
@@ -70,14 +81,22 @@ const Home = () => {
       </div>
 
       <p className="text-sm text-gray-500 mb-6">
-        <span className="text-gray-500">{sorted.length}</span> products found
+        <span className="font-semibold text-stone-900">{sorted.length}</span> products found
       </p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-        {sorted.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+      {sorted.length === 0 ? (
+        <div className="text-center py-16 bg-stone-50 rounded-2xl border border-dashed border-stone-200">
+          <p className="text-stone-500 font-medium">
+            No products found matching "{searchQuery}"
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {sorted.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
